@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "tidewave": {
+      "type": "stdio",
+      "command": "mcp-proxy",
+      "args": [
+        "http://127.0.0.1:__PORT__/tidewave/mcp"
+      ],
+      "env": {}
+    }
+  }
+}
