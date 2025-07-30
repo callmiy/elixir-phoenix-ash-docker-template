@@ -1,0 +1,24 @@
+services:
+  app:
+    extends:
+      file: ./compose.app.yaml
+      service: app
+    build:
+      target: dev
+    user: "1000:1000"
+    entrypoint:
+      - /bin/bash
+      - "dev.sh"
+      - serve
+    volumes:
+      - "..:${CONTAINER_APP_ROOT_DIR}"
+      - "./compose.app.dev.sh:/usr/local/bin/dev.sh"
+      - "not_used___build:${CONTAINER_APP_ROOT_DIR}/_build/"
+      - "not_used__deps:${CONTAINER_APP_ROOT_DIR}/deps/"
+    environment:
+      # Runtime
+      - "TELEMETRY_METRICS_CONSOLEREPORTER_FILE_PATH=${TELEMETRY_METRICS_CONSOLEREPORTER_FILE_PATH}"
+
+volumes:
+  not_used___build:
+  not_used__deps:

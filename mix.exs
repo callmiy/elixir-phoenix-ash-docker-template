@@ -5,12 +5,22 @@ defmodule MyApp.MixProject do
     [
       app: :my_app,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      consolidate_protocols: Mix.env() != :dev
+      consolidate_protocols: Mix.env() != :dev,
+      releases: [
+        my_app: [
+          include_executables_for: [:unix],
+          applications: [
+            my_app: :permanent,
+            opentelemetry_exporter: :permanent,
+            opentelemetry: :temporary
+          ]
+        ]
+      ]
     ]
   end
 
@@ -20,7 +30,11 @@ defmodule MyApp.MixProject do
   def application do
     [
       mod: {MyApp.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [
+        :logger,
+        :runtime_tools,
+        :os_mon
+      ]
     ]
   end
 
@@ -37,10 +51,22 @@ defmodule MyApp.MixProject do
       {:picosat_elixir, "~> 0.2"},
       {:sourceror, "~> 1.8"},
       {:ash_ai, "~> 0.2"},
+      {:opentelemetry_exporter, "~> 1.8"},
+      {:opentelemetry_api, "~> 1.4"},
+      {:opentelemetry, "~> 1.5"},
+      {:opentelemetry_semantic_conventions, "~> 1.27"},
+      {:opentelemetry_bandit, "~> 0.2"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_telemetry, "~> 1.1"},
       {:opentelemetry_ash, "~> 0.1"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_authentication, "~> 4.0"},
-      {:mix_test_interactive, "~> 5.0"},
+      {
+        :mix_test_interactive,
+        "~> 5.0",
+        only: [:dev, :test], runtime: false
+      },
       {:tidewave, "~> 0.2", only: [:dev]},
       {:live_debugger, "~> 0.3", only: [:dev]},
       {:ash_archival, "~> 2.0"},

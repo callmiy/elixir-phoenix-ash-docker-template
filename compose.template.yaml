@@ -1,0 +1,4 @@
+include:
+  - docker/compose.signoz.yaml
+  - docker/compose.db.dev.yaml
+  - docker/compose.app.dev.yaml

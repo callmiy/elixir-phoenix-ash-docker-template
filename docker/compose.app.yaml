@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        CONTAINER_BUILDER_IMAGE: ${CONTAINER_BUILDER_IMAGE}
+        RUNNER_IMAGE: ${RUNNER_IMAGE}
+    image: ${CONTAINER_APP_IMAGE_NAME}
+    ports:
+      - ${EXTERNAL_ACCESS_HTTPS_PORT}:4000
+      - ${EXTERNAL_ACCESS_HTTP_PORT}:4001
+    depends_on:
+      db:
+        condition: service_started
+        required: true
+    hostname: ${PROJECT_TAG}
+    logging:
+      options:
+        max-size: 100m
+        max-file: 5
+    labels:
+      - "my-app-logs=1753272418"
+    environment:
+      # Runtime
+      - "PROJECT_TAG=${PROJECT_TAG}"
+      - "PORT=${PORT}"
+      - "DATABASE_URL=${DATABASE_URL}"
+      - "PHX_SERVER=${PHX_SERVER}"
+      - "SECRET_KEY_BASE=${SECRET_KEY_BASE}"
+      - "RELEASE_COOKIE=${RELEASE_COOKIE}"
+      - "POOL_SIZE=${POOL_SIZE:-}"
+      - "TOKEN_SIGNING_SECRET=${TOKEN_SIGNING_SECRET}"
+      - "OTEL_EXPORTER_BACKEND=${OTEL_EXPORTER_BACKEND}"
+      - "OTEL_EXPORTER_HOSTNAME=${OTEL_EXPORTER_HOSTNAME}"
+      - "OTEL_EXPORTER_PORT=${OTEL_EXPORTER_PORT}"
+      # Compilation
+      - "PHX_HOST=${PHX_HOST}"
+      - "APP_LISTEN_HTTP_PORT=${APP_LISTEN_HTTP_PORT}"
+      - "APP_LISTEN_HTTPS_PORT=${APP_LISTEN_HTTPS_PORT}"
+      - "EXTERNAL_ACCESS_HTTPS_PORT=${EXTERNAL_ACCESS_HTTPS_PORT}"
+      - "DO_NOT_FORCE_SSL=${DO_NOT_FORCE_SSL}"

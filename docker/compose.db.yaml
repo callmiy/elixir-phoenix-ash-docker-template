@@ -1,0 +1,11 @@
+services:
+  # Database service
+  db:
+    extends:
+      file: ./compose.db.base.yaml
+      service: db-base
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+if not Code.ensure_loaded?(MyApp.SharedConfig) do
+  Code.require_file(Path.join(__DIR__, "./shared_config.exs"))
+end
+
+alias MyApp.SharedConfig
+
 config :ash,
   allow_forbidden_field_for_relationships_by_default?: true,
   include_embedded_source_by_default?: false,
@@ -51,7 +57,9 @@ config :spark,
 config :my_app,
   ecto_repos: [MyApp.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true],
-  ash_domains: [MyApp.Accounts]
+  ash_domains: [MyApp.Accounts],
+  telemetry_metrics_consolereporter_file_path:
+    SharedConfig.telemetry_metrics_consolereporter_file_path()
 
 # Configures the endpoint
 config :my_app, MyAppWeb.Endpoint,
@@ -97,11 +105,21 @@ config :tailwind,
 
 # Configures Elixir's Logger
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
+  format: SharedConfig.log_format(),
   metadata: [:request_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+if Mix.env() != :prod do
+  config :mix_test_interactive,
+    clear: true,
+    exclude: [
+      ~r/___scratch/,
+      ~r/\.db$/,
+      ~r/\.db-.+/
+    ]
+end
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

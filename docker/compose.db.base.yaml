@@ -1,0 +1,22 @@
+services:
+  # Base database service configuration (no volumes)
+  db-base:
+    image: postgres:${POSTGRES_IMAGE_TAG:-17.5}
+    ports:
+      - "${DATABASE_PUBLISH_PORT}:5432"
+    logging:
+      options:
+        max-size: 10m
+        max-file: 2
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      - "POSTGRES_USER=${DATABASE_USERNAME}"
+      - "POSTGRES_PASSWORD=${DATABASE_PASSWORD}"
+      - "POSTGRES_DB=${DATABASE_NAME}"

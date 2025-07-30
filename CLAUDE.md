@@ -1,9 +1,153 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a Phoenix/Elixir web application using the Ash Framework (v3.0) for declarative resource modeling and business logic. The project includes authentication, and comprehensive Docker development setup.
+
+## Essential Commands
+
+### Development (with docker)
+```bash
+# Initial setup
+cp .env.example .env
+
+# Start development server - will also run migrations
+docker compose up
+
+# Run tests
+docker compose exec app dev.sh t
+
+# Get an iex session
+docker compose exec app dev.sh diex
+```
+
+## Architecture Overview
+
+### Core Technologies
+- **Phoenix Framework** (~1.7.21) - Web framework
+- **Ash Framework** (~3.0) - Declarative resource framework handling data models, actions, and policies
+- **AshAuthentication** - Multi-strategy authentication (password, magic link, tokens)
+- **PostgreSQL** - Database via AshPostgres/Ecto
+
+### Project Structure
+- `lib/my_app/` - Core business logic and Ash resources
+  - `accounts/` - User authentication domain with Ash resources
+- `lib/my_app_web/` - Web layer (controllers, LiveViews, components)
+- `config/` - Environment-specific configuration
+- `rel/` - Release configuration and migration scripts
+
+### Key Architectural Patterns
+
+1. **Ash Resources**: Data models are defined as Ash resources with declarative actions, validations, and policies. Resources live in domain folders (e.g., `lib/my_app/accounts/`).
+
+2. **Authentication**: The app uses AshAuthentication with multiple strategies. Authentication flows are handled through Ash resources with built-in actions for registration, confirmation, password reset, etc.
+
+3. **Development Tools**:
+   - Email preview at `/dev/mailbox`
+   - Admin interface at `/admin`
+   - Phoenix LiveDashboard for monitoring
+
+### Environment Configuration
+Configuration is managed through environment variables (see `.env.example`). The app uses runtime configuration in `config/runtime.exs`.
+
+### Testing Approach
+- ExUnit with Ecto sandbox for database isolation
+- Test helpers in `test/support/`
+- Use `mix test.interactive` for watch mode during development
+
+### Configuration Management
+
+The project uses a custom **SharedConfig** module pattern (`config/shared_config.exs`) to centralize runtime configuration handling. This pattern provides:
+
+1. **Centralized environment variable processing**: All runtime configuration is handled in one module with consistent error handling and type conversions.
+
+2. **Key functions**:
+   - `start_server?/0` - Controls Phoenix server startup (false in test, based on PHX_SERVER otherwise)
+   - `endpoint_config/0` - Complete endpoint configuration including ports, host, and secrets
+   - `pool_size/0` - Database connection pool sizing
+   - `database_url/0` - Database connection with automatic test partition support
+
+3. **Usage pattern**: Config files load SharedConfig using:
+   ```elixir
+   if not Code.ensure_loaded?(MyApp.SharedConfig) do
+     Code.require_file(Path.join(__DIR__, "./shared_config.exs"))
+   end
+   ```
+
+4. **Environment variable handling**: The `process_env_var/2` function provides flexible handling:
+   - Required variables with helpful error messages
+   - Optional variables with defaults
+   - Automatic type conversion
+   - Empty string treated as unset
+
+5. **Required environment variables**:
+   - `DATABASE_URL` - Database connection string
+   - `SECRET_KEY_BASE` - Phoenix secret (generate with `mix phx.gen.secret`)
+   - `PHX_HOST` - Application hostname
+   - Optional: `PORT`, `POOL_SIZE`, `PHX_SERVER`, `EXTERNAL_ACCESS_HTTPS_PORT`
+
+This pattern ensures consistent configuration management across environments and provides clear deployment requirements.
+
+### Docker Setup
+Multi-stage Dockerfile with development and production targets. Development uses volume mounts for hot reloading. The compose files provide:
+- PostgreSQL database
+- Application container with hot reloading
+- SigNoz observability stack
+
+## Coding Style Preferences
+
+### Conditional Patterns
+
+When checking for nil/falsy values from `Application.get_env/2` or similar functions, prefer using `if` with variable assignment over `case` statements:
+
+**Preferred pattern:**
+```elixir
+some_var =
+  if other_var = Application.get_env(:my_app, :some_config) do
+    other_var
+  else
+    some_var
+  end
+```
+
+**Avoid:**
+```elixir
+some_var =
+  case Application.get_env(:my_app, :some_config) do
+    nil ->
+      some_var
+
+    other_var ->
+      other_var
+  end
+```
+
+This pattern is more idiomatic in Elixir and clearly shows the intent of checking for a truthy value while also binding it to a variable for use in the conditional branch.
+
+### Bash Script Development
+
+When creating or modifying bash scripts in this project, **always** run shellcheck to ensure code quality:
+
+1. **After creating any bash script**: Run `shellcheck <script>` immediately to catch issues
+2. **After modifying bash scripts**: Run shellcheck again to ensure no new issues were introduced
+3. **Before considering a script complete**: Run `shellcheck -S warning <script>` for stricter checking
+
+Common shellcheck fixes to apply:
+- Use `read -r` to prevent backslash mangling
+- Quote variables to prevent globbing and word splitting: `"$var"` not `$var`
+- Avoid useless `echo` in command substitutions: use `$var` not `$(echo "$var")`
+- Use `#!/bin/bash` or `#!/bin/sh` shebang line at the start of scripts
+
+This ensures all bash scripts in the project maintain consistent quality and follow best practices.
+
 <!-- usage-rules-start -->
 <!-- usage-rules-header -->
 # Usage Rules
 
-**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below. 
-Before attempting to use any of these packages or to discover if you should use them, review their 
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
 usage rules to understand the correct patterns, conventions, and best practices.
 <!-- usage-rules-header-end -->
 
@@ -36,7 +180,7 @@ mix usage_rules.docs Enum.zip/1
 
 ## Searching Documentation
 
-You should also consult the documentation of any tools you are using, early and often. The best 
+You should also consult the documentation of any tools you are using, early and often. The best
 way to accomplish this is to use the `usage_rules.search_docs` mix task. Once you have
 found what you are looking for, use the links in the search results to get more detail. For example:
 
@@ -85,7 +229,7 @@ mix usage_rules.search_docs "Enum.zip" --query-by title
 - Use guard clauses: `when is_binary(name) and byte_size(name) > 0`
 - Prefer multiple function clauses over complex conditional logic
 - Name functions descriptively: `calculate_total_price/2` not `calc/2`
-- Predicate function names should not start with `is` and should end in a question mark. 
+- Predicate function names should not start with `is` and should end in a question mark.
 - Names like `is_thing` should be reserved for guards
 
 ## Data Structures

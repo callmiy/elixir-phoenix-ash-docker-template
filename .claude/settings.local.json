@@ -1,0 +1,35 @@
+{
+  "env": {
+    "DISABLE_TELEMETRY": "true"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Agent",
+      "Bash",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Edit",
+      "MultiEdit",
+      "Read",
+      "TodoRead",
+      "TodoWrite",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:hexdocs.pm)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "Write",
+      "mcp__consult7__*",
+      "mcp__context7__*",
+      "mcp__context7__*",
+      "mcp__tidewave__*"
+    ],
+    "deny": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "tidewave"
+  ]
+}

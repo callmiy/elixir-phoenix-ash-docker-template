@@ -35,3 +35,17 @@ my_app-*.tar
 npm-debug.log
 /assets/node_modules/
 
+compose.yaml
+.mcp.json
+
+# scratch files
+*.___scratch*
+*.---scratch*
+*___scratch*
+*---scratch*
+
+!**/.claude/**
+!**/.claude
+!AGENTS.md
+
+!.claude.ebnis.chat.md
