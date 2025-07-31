@@ -79,24 +79,13 @@ defmodule MyApp.SharedConfig do
   end
 
   # runtime
-  def otel() do
-    if is_prod() do
-      opentelemetry_exporter_config()
-    else
-      case process_env_var("OTEL_EXPORTER_BACKEND") do
-        nil ->
-          []
-
-        "stdout" ->
-          stdout_exporter_config()
-
-        "endpoints" ->
-          opentelemetry_exporter_config()
-
-        "both" ->
-          opentelemetry_exporter_config() ++ stdout_exporter_config()
-      end
-    end
+  def opentelemetry_config() do
+    [
+      processors: opentelemetry_processors(),
+      resource: [
+        service: %{name: "my_app"}
+      ]
+    ]
   end
 
   # runtime
@@ -123,6 +112,26 @@ defmodule MyApp.SharedConfig do
 
   defp is_prod do
     config_env() == :prod
+  end
+
+  defp opentelemetry_processors() do
+    if is_prod() do
+      opentelemetry_exporter_config()
+    else
+      case process_env_var("OTEL_EXPORTER_BACKEND") do
+        nil ->
+          []
+
+        "stdout" ->
+          stdout_exporter_config()
+
+        "endpoints" ->
+          opentelemetry_exporter_config()
+
+        "both" ->
+          opentelemetry_exporter_config() ++ stdout_exporter_config()
+      end
+    end
   end
 
   defp stdout_exporter_config do

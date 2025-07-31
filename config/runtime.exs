@@ -33,8 +33,7 @@ config :my_app, MyApp.Repo,
 
 config :my_app, MyAppWeb.Endpoint, SharedConfig.endpoint_config()
 
-config :opentelemetry, :resource, service: %{name: "my_app"}
-config :opentelemetry, :processors, SharedConfig.otel()
+config :opentelemetry, SharedConfig.opentelemetry_config()
 
 config :my_app, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
