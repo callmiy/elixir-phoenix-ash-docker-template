@@ -5,6 +5,17 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      load: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+      network: {}
+      paging: {}
+      processes: {}
   prometheus:
     config:
       global:
@@ -37,7 +48,15 @@ processors:
   resourcedetection:
     # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
     detectors: [env, system]
+    system:
+      hostname_sources:
+        - os
     timeout: 2s
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: staging
+      action: upsert
   resource/docker_logs:
     attributes:
       - key: service.name
@@ -126,6 +145,14 @@ service:
       receivers: [prometheus]
       processors: [batch]
       exporters: [signozclickhousemetrics]
+    metrics/infra:
+      receivers:
+        - hostmetrics
+      processors:
+        - resourcedetection
+        - resource/env
+      exporters:
+        - signozclickhousemetrics
     logs:
       receivers:
         - tcplog/docker
