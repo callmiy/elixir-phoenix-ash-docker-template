@@ -83,7 +83,9 @@ defmodule MyApp.SharedConfig do
     [
       processors: opentelemetry_processors(),
       resource: [
-        service: %{name: "my_app"}
+        service: %{
+          name: process_env_var("OTEL_SERVICE_NAME", default: "my_app")
+        }
       ]
     ]
   end
